@@ -1,0 +1,33 @@
+{
+  "name": "nga-translate",
+  "version": "13.0.0",
+  "author": "Sajad Mehrabi",
+  "description": "Angular ngx-translate wrapper for support default translate",
+  "license": "MIT",
+  "keywords": [
+    "ngx",
+    "ng",
+    "nga",
+    "avan",
+    "angular",
+    "wrapper",
+    "default translate",
+    "wrapper ngx-translate",
+    "library",
+    "angular translate wrapper"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mehrabisajad/nga-translate.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mehrabisajad/nga-translate/issues"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "peerDependencies": {
+    "@angular/core": "^13.0.0",
+    "@ngx-translate/core": "^14.0.0"
+  }
+}
