@@ -1,11 +1,13 @@
-import { ChangeDetectorRef, Injectable, OnDestroy, Pipe, PipeTransform } from '@angular/core';
+import { ChangeDetectorRef, Injectable, OnDestroy, Optional, Pipe, PipeTransform } from '@angular/core';
 import { isObservable, Subscription } from 'rxjs';
 import { TranslateParser, TranslateService, TranslationChangeEvent } from '@ngx-translate/core';
 import { LangChangeEvent } from '@ngx-translate/core/lib/translate.service';
-import { equals, exchangeParam, isDefined } from './util';
+import { equals, exchangeParam, getTranslateKey, isDefined } from './util';
+import { TranslatePrefixDirective } from './translate-prefix.directive';
 
 @Injectable({ providedIn: 'root' })
 @Pipe({
+  standalone: true,
   name: 'ngaTranslate',
   pure: false, // required to update the value when the promise is resolved
 })
@@ -17,9 +19,11 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
   onTranslationChange: Subscription | undefined;
   onLangChange: Subscription | undefined;
   onDefaultLangChange: Subscription | undefined;
+  onPrefixChange: Subscription | undefined;
 
   constructor(
     private translate: TranslateService,
+    @Optional() private translatePrefixDirective: TranslatePrefixDirective,
     private parser: TranslateParser,
     private _ref: ChangeDetectorRef,
   ) {}
@@ -37,7 +41,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
       this.lastKey = key as string;
       this._ref.markForCheck();
     };
-    if (translations) {
+    if (translations && typeof key === 'string') {
       let res = this.translate.getParsedResult(translations, key, interpolateParams);
       if (isObservable(res.subscribe)) {
         res.subscribe(onTranslation);
@@ -47,7 +51,8 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
     }
 
     if (typeof key === 'string') {
-      this.translate.get(key, interpolateParams).subscribe(onTranslation);
+      const translateKey = getTranslateKey(key, this.translatePrefixDirective?.ngaTranslatePrefix());
+      this.translate.get(translateKey, interpolateParams).subscribe(onTranslation);
     } else {
       this.applyDefault(key, interpolateParams, JSON.stringify(key));
     }
@@ -151,6 +156,16 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
       });
     }
 
+    // subscribe to onPrefixChange event, in case the default language changes
+    if (!this.onPrefixChange) {
+      this.onPrefixChange = this.translatePrefixDirective?.onPrefixChange.subscribe(() => {
+        if (this.lastKey) {
+          this.lastKey = null;
+          this.updateValue(query, defaults, interpolateParams);
+        }
+      });
+    }
+
     return this.value;
   }
 
@@ -169,6 +184,10 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
     if (typeof this.onDefaultLangChange !== 'undefined') {
       this.onDefaultLangChange.unsubscribe();
       this.onDefaultLangChange = undefined;
+    }
+    if (typeof this.onPrefixChange !== 'undefined') {
+      this.onPrefixChange.unsubscribe();
+      this.onPrefixChange = undefined;
     }
   }
 

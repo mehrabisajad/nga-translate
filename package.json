@@ -1,11 +1,10 @@
 {
   "name": "nga-translate",
-  "version": "17.0.0",
+  "version": "17.1.0",
   "author": "Sajad Mehrabi",
-  "description": "Angular ngx-translate wrapper for support default translate",
+  "description": "Angular ngx-translate wrapper for support default translate and prefixed translations.",
   "license": "MIT",
   "scripts": {
-    "build": "ng build:lib",
     "build:lib": "ng build nga-translate",
     "deploy": "npm run build:lib && npm publish --access=public dist",
     "lint": "eslint . --ext .js,.ts",

@@ -1,76 +1,114 @@
 # ngaTranslate
 
-**A wrapper for ngx-translate library that support default translate.**
+**A wrapper for ngx-translate library that supports default and prefixed translations.**
 
 [![npm version](https://badge.fury.io/js/nga-translate.svg)](http://badge.fury.io/js/nga-translate)
 [![GitHub issues](https://img.shields.io/github/issues/mehrabisajad/nga-translate.svg)](https://github.com/mehrabisajad/nga-translate/issues)
 [![GitHub stars](https://img.shields.io/github/stars/mehrabisajad/nga-translate.svg)](https://github.com/mehrabisajad/nga-translate/stargazers)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/mehrabisajad/nga-translate/master/LICENSE)
 
-ngaTranslate is an Angular library that provides a pipe and directive to simplify the translation of text in your Angular applications. It is a wrapper for the popular ngx-translate library and provides additional features and convenience methods.
+**ngaTranslate** is an Angular library that provides pipes and directives to simplify text translation in Angular applications.  
+It is a wrapper for the popular **ngx-translate** library and adds useful features such as **default translations** and **prefix-based translations**.
+
+---
 
 ## Installation
 
 To install ngaTranslate, run the following command in your terminal:
 
-```
+```bash
 npm install nga-translate --save
 ```
 
+---
+
 ## Usage
 
-### Pipe
+### 1. Pipe
 
-The ngaTranslate pipe can be used to translate text in your Angular templates. The pipe takes two and three arguments:
+The `ngaTranslate` pipe can be used to translate text inside Angular templates.  
+It accepts up to three arguments:
 
-#### 1. Three parameters:
+- **Translation key**
+- **Default translation** (string or object, used if key is not found)
+- **Params** (object, for dynamic values)
 
-Translation key and an optional object of default translation and optional object of params. The default translation can be use if the key is not found.
-
-##### Examples
-
-```html
-{{ 'key' | ngaTranslate }} {{ 'key' | ngaTranslate : 'default translate' }} {{ 'key' | ngaTranslate : 'default translate' : { params } }} {{
-'key' | ngaTranslate : 'default translate [{ p1 }]' : { p1: 'value' } }} {{ 'key' | ngaTranslate : { en: 'default translate [{ p1 }]', fr:
-'traduction par défaut [{ p1 }]' } : { p1: 'value' } }}
-```
-
-#### 2. Two parameters:
-
-An optional object of default translation and optional object of params. The default translation can be use if the key is not found.
-
-##### Examples
+#### Examples
 
 ```html
-{{ { en: 'default translate' } | ngaTranslate } }} {{ { en: 'default translate [{ p1 }]' } | ngaTranslate : { p1: 'value' } }} {{ { en:
-'default translate [{ p1 }]', fr: 'traduction par défaut [{ p1 }]' } | ngaTranslate : { p1: 'value' } }}
+{{ 'key' | ngaTranslate }} {{ 'key' | ngaTranslate : 'default translate' }} {{ 'key' | ngaTranslate : 'default translate' : { p1: 'value' }
+}} {{ 'key' | ngaTranslate : 'default translate [{ p1 }]' : { p1: 'value' } }} {{ 'key' | ngaTranslate : { en: 'Hello [{ p1 }]', fr:
+'Bonjour [{ p1 }]' } : { p1: 'value' } }}
 ```
 
-### Directive
+You can also use the pipe with only default values (without an explicit key):
 
-The ngaTranslate directive can be used to translate a key with valueTranslate and element's content. The element's content use for default translate.
+```html
+{{ { en: 'default translate' } | ngaTranslate }} {{ { en: 'default translate [{ p1 }]' } | ngaTranslate : { p1: 'value' } }} {{ { en:
+'default [{ p1 }]', fr: 'par défaut [{ p1 }]' } | ngaTranslate : { p1: 'value' } }}
+```
 
-##### Examples
+---
+
+### 2. Directive
+
+The `ngaTranslate` directive can be used directly on elements.  
+It supports both a **translation key** and the element’s content (as default translation).
+
+#### Examples
 
 ```html
 <p ngaTranslate>Hello, world!</p>
 <p ngaTranslate="key">Hello, world!</p>
-<p ngaTranslate="key" [translateValues]="{ p1: 'value' }">Hello, world! [{ p1 }]</p>
-<p ngaTranslate="key" [translateValues]="{ p1: 'value' }">
-  &lcub; en: 'Hello, world! [&lcub; p1 }]', fr: 'Bonjour le monde! [&lcub; p1 }]' }
-</p>
+<p ngaTranslate="key" [translateValues]="{ p1: 'value' }">Hello, [{ p1 }]</p>
+<p ngaTranslate="key" [translateValues]="{ p1: 'value' }">&lcub; en: 'Hello, [&lcub; p1 }]', fr: 'Bonjour, [&lcub; p1 }]' }</p>
 ```
 
-### Features
+---
 
-1. Simplified translation syntax: ngaTranslate provides a simpler syntax for translating text than ngx-translate.
-2. Default translations: ngaTranslate allows you to specify a default translation to use if the translation key is not found.
-3. Contextual translations: ngaTranslate allows you to provide additional context for translations, such as the current user's language or location.
+### 3. Prefix Directive
+
+The `ngaTranslatePrefix` directive allows you to define a translation **prefix** for all child elements.  
+This is useful for grouping translations under a common namespace.
+
+#### Examples
+
+```html
+<div ngaTranslatePrefix="prefix">
+  <label ngaTranslate="df.bank">Bank</label>
+  <!-- Translates using key: prefix.df.bank -->
+
+  <button>{{ 'submit' | ngaTranslate : 'Submit' }}</button>
+  <!-- Translates using key: prefix.submit -->
+
+  <button>{{ '.root.submit' | ngaTranslate : 'Root Submit' }}</button>
+  <!-- Translates using key: root.submit (ignores prefix) -->
+</div>
+```
+
+#### Note:
+
+If the key starts with a dot (.), the prefix will be ignored, and the translation will resolve from the root namespace.
+
+---
+
+## Features
+
+1. **Simplified syntax** – Easier and cleaner than raw ngx-translate usage.
+2. **Default translations** – Specify fallbacks when keys are missing.
+3. **Contextual translations** – Support for parameterized translations.
+4. **Prefix translations** – Automatically prepend a prefix to all translation keys within a scope.
+5. **Root override** – Use keys starting with `.` to bypass the prefix.
+
+---
 
 ## Contributing
 
-We welcome contributions to ngaTranslate. Please feel free to create an issue or pull request on GitHub.
+We welcome contributions to ngaTranslate.  
+Feel free to open an issue or submit a pull request on GitHub.
+
+---
 
 ## License
 
-ngaTranslate is licensed under the MIT License.
+ngaTranslate is licensed under the **MIT License**.

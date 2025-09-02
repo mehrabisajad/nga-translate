@@ -1,24 +1,28 @@
-import { Directive, ElementRef, inject, Input, OnChanges, OnDestroy, OnInit } from '@angular/core';
+import { Directive, ElementRef, inject, input, OnChanges, OnDestroy, OnInit } from '@angular/core';
 import { TranslateParser, TranslateService } from '@ngx-translate/core';
 
-import { exchangeParam } from './util';
+import { exchangeParam, getTranslateKey } from './util';
 import { Subscription } from 'rxjs';
+import { TranslatePrefixDirective } from './translate-prefix.directive';
 
 /**
  * A wrapper directive on top of the translate pipe as the inbuilt translate directive from ngx-translate is too verbose and buggy
  */
 @Directive({
+  standalone: true,
   selector: '[ngaTranslate]',
 })
 export class TranslateDirective implements OnChanges, OnInit, OnDestroy {
-  @Input() ngaTranslate!: string;
-  @Input() translateValues?: { [key: string]: unknown } | string;
+  ngaTranslate = input.required<string>();
+  translateValues = input<{ [key: string]: unknown } | string>();
+  translatePrefix = inject(TranslatePrefixDirective, { optional: true });
   translateService = inject(TranslateService);
   translateParser = inject(TranslateParser);
   el = inject(ElementRef);
 
   defaults?: string | null;
 
+  onPrefixChange: Subscription | undefined;
   onTranslationChange: Subscription | undefined;
   onLangChange: Subscription | undefined;
   onDefaultLangChange: Subscription | undefined;
@@ -30,6 +34,7 @@ export class TranslateDirective implements OnChanges, OnInit, OnDestroy {
     this.onTranslationChange = this.translateService.onTranslationChange.subscribe(() => this.getTranslation());
     this.onLangChange = this.translateService.onLangChange.subscribe(() => this.getTranslation());
     this.onDefaultLangChange = this.translateService.onDefaultLangChange.subscribe(() => this.getTranslation());
+    this.onPrefixChange = this.translatePrefix?.onPrefixChange.subscribe(() => this.getTranslation());
   }
 
   ngOnChanges(): void {
@@ -41,20 +46,23 @@ export class TranslateDirective implements OnChanges, OnInit, OnDestroy {
       this.defaults = this.el.nativeElement.innerHTML;
     }
 
+    const translateKey = getTranslateKey(this.ngaTranslate(), this.translatePrefix?.ngaTranslatePrefix());
+    const translateValues = this.translateValues();
+
     if (!this.ngaTranslate) {
       this.applyDefault(this.ngaTranslate);
       return;
     }
 
-    const onGet = this.translateService.get(this.ngaTranslate, this.translateValues).subscribe({
+    const onGet = this.translateService.get(translateKey, translateValues).subscribe({
       next: (value: string) => {
-        if (value === this.ngaTranslate) {
+        if (value === translateKey) {
           this.applyDefault(value);
         } else {
           this.el.nativeElement.innerHTML = value;
         }
       },
-      error: () => `${this.translationNotFoundMessage}[${this.ngaTranslate}]`,
+      error: () => `${this.translationNotFoundMessage}[${translateKey}]`,
     });
 
     this.onTranslationGets.push(onGet);
@@ -83,6 +91,10 @@ export class TranslateDirective implements OnChanges, OnInit, OnDestroy {
    * Clean any existing subscription to change events
    */
   private _dispose(): void {
+    if (typeof this.onPrefixChange !== 'undefined') {
+      this.onPrefixChange.unsubscribe();
+      this.onPrefixChange = undefined;
+    }
     if (typeof this.onTranslationChange !== 'undefined') {
       this.onTranslationChange.unsubscribe();
       this.onTranslationChange = undefined;
