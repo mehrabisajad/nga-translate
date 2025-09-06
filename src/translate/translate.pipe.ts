@@ -2,8 +2,9 @@ import { ChangeDetectorRef, Injectable, OnDestroy, Optional, Pipe, PipeTransform
 import { isObservable, Subscription } from 'rxjs';
 import { TranslateParser, TranslateService, TranslationChangeEvent } from '@ngx-translate/core';
 import { LangChangeEvent } from '@ngx-translate/core/lib/translate.service';
-import { equals, exchangeParam, getTranslateKey, isDefined } from './util';
+import { equals, exchangeParam, isDefined } from './util';
 import { TranslatePrefixDirective } from './translate-prefix.directive';
+import { getTranslateKey } from './translate-key';
 
 @Injectable({ providedIn: 'root' })
 @Pipe({

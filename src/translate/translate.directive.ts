@@ -1,9 +1,10 @@
 import { Directive, ElementRef, inject, input, OnChanges, OnDestroy, OnInit } from '@angular/core';
 import { TranslateParser, TranslateService } from '@ngx-translate/core';
 
-import { exchangeParam, getTranslateKey } from './util';
+import { exchangeParam } from './util';
 import { Subscription } from 'rxjs';
 import { TranslatePrefixDirective } from './translate-prefix.directive';
+import { getTranslateKey } from './translate-key';
 
 /**
  * A wrapper directive on top of the translate pipe as the inbuilt translate directive from ngx-translate is too verbose and buggy

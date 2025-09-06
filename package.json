@@ -1,6 +1,6 @@
 {
   "name": "nga-translate",
-  "version": "17.1.0",
+  "version": "17.1.1",
   "author": "Sajad Mehrabi",
   "description": "Angular ngx-translate wrapper for support default translate and prefixed translations.",
   "license": "MIT",
