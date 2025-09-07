@@ -30,10 +30,12 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
   ) {}
 
   updateValue(key: string | Object, defaults?: Object | string, interpolateParams?: Object, translations?: any): void {
-    let onTranslation = (res: string) => {
-      const value = res ?? key;
+    const translateKey = typeof key === 'string' ? getTranslateKey(key, this.translatePrefixDirective?.ngaTranslatePrefix()) : '';
 
-      if (value === key) {
+    let onTranslation = (res: string) => {
+      const value = res ?? translateKey;
+
+      if (value === translateKey) {
         this.applyDefault(defaults, interpolateParams, value);
       } else {
         this.value = value;
@@ -43,7 +45,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
       this._ref.markForCheck();
     };
     if (translations && typeof key === 'string') {
-      let res = this.translate.getParsedResult(translations, key, interpolateParams);
+      let res = this.translate.getParsedResult(translations, translateKey, interpolateParams);
       if (isObservable(res.subscribe)) {
         res.subscribe(onTranslation);
       } else {
@@ -52,7 +54,6 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
     }
 
     if (typeof key === 'string') {
-      const translateKey = getTranslateKey(key, this.translatePrefixDirective?.ngaTranslatePrefix());
       this.translate.get(translateKey, interpolateParams).subscribe(onTranslation);
     } else {
       this.applyDefault(key, interpolateParams, JSON.stringify(key));
